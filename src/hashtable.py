@@ -18,6 +18,7 @@ class HashTable:
     def __init__(self, capacity):
         self.capacity = capacity  # Number of buckets in the hash table
         self.storage = [None] * capacity
+        self.count = 0
 
     def _hash(self, key):
         '''
@@ -50,7 +51,23 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+
+        # If no more open space, double capacity
+        if self.count >= self.capacity:
+            self.resize()
+
+        # Make sure index is in range
+        if key > self.count:
+            print('Error: Index out of range.')
+            return None
+
+        # Shift everything right one
+        for i in range(self.count, key, -1):
+            self.storage[i] = self.storage[i-1]
+
+        # Insert value into table
+        self.storage[key] = value
+        self.count += 1
 
     def remove(self, key):
         '''
@@ -79,7 +96,11 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        self.capacity *= 2
+        new_storage = [None] * self.capacity
+        for i in range(self.count):
+            new_storage[i] = self.storage
+        self.storage = new_storage
 
 
 if __name__ == "__main__":
