@@ -52,21 +52,23 @@ class HashTable:
         Fill this in.
         '''
 
+        index = self._hash_mod(key)
+
         # If no more open space, double capacity
         if self.count >= self.capacity:
             self.resize()
 
         # Make sure index is in range
-        if key > self.count:
+        if index > self.count:
             print('Error: Index out of range.')
             return None
 
         # Shift everything right one
-        for i in range(self.count, key, -1):
+        for i in range(self.count, index, -1):
             self.storage[i] = self.storage[i-1]
 
         # Insert value into table
-        self.storage[key] = value
+        self.storage[index] = {key: value}
         self.count += 1
 
     def remove(self, key):
