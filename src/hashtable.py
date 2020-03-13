@@ -3,7 +3,7 @@
 # '''
 # Linked List hash table key/value pair
 # '''
-class LinkedPair:
+class Node:
     def __init__(self, key, value):
         self.key = key
         self.value = value
@@ -52,24 +52,33 @@ class HashTable:
         Fill this in.
         '''
 
+        # Add to count
+        self.count += 1
+
+        # Get index based on hash of key
         index = self._hash_mod(key)
 
-        # If no more open space, double capacity
-        if self.count >= self.capacity:
-            self.resize()
+        # Get the storage node
+        node = self.storage[index]
 
-        # Make sure index is in range
-        if index > self.count:
-            print('Error: Index out of range.')
-            return None
+        # Add KeyValuePair to node
+        if node is None:
+            self.storage[index] = Node(key, value)
+            # Return out of the function
+            return
 
-        # Shift everything right one
-        for i in range(self.count, index, -1):
-            self.storage[i] = self.storage[i-1]
+        # Collision handler
 
-        # Insert value into table
-        self.storage[index] = {key: value}
-        self.count += 1
+        # Iterate to end of node links
+        prev = node
+        while node is not None:
+            if node.key == key:
+                node.value = value
+                return
+            prev = node
+            node = node.next
+        # Add the values to the node
+        prev.next = Node(key, value)
 
     def remove(self, key):
         '''
@@ -79,7 +88,33 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        # Find index hash of the key
+        index = self._hash_mod(key)
+        # Open the linked lists at index
+        node = self.storage[index]
+        prev = None
+
+        # Finds either the requested node or end, whichever first
+        while node is not None and node.key != key:
+            prev = node
+            node = node.next
+
+        # If node is none, key was not found
+        if node is None:
+            return None
+        # Else key was found
+        else:
+            # Minus count
+            self.count -= 1
+            # Save the value
+            result = node.value
+            # Remove the element from the list and repoint the next pointer
+            # Exception handler for first value in index
+            if prev is None:
+                self.storage[index] = None
+            # Base Case
+            else:
+                prev.next = prev.next.next
 
     def retrieve(self, key):
         '''
@@ -89,7 +124,22 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        # Get the index hash of the key
+        index = self._hash_mod(key)
+
+        # Open the linked lists at index position in storage
+        node = self.storage[index]
+
+        # Traverse the linked lists to find the key (or end)
+        while node is not None and node.key != key:
+            node = node.next
+
+        # If node is none, key has not been found.
+        if node is None:
+            return None
+        # Else return the value found
+        else:
+            return node.value
 
     def resize(self):
         '''
@@ -98,11 +148,22 @@ class HashTable:
 
         Fill this in.
         '''
+        # Save the old values
+        old_capacity = self.capacity
+        old_storage = self.storage
+        # Double the capacity
         self.capacity *= 2
-        new_storage = [None] * self.capacity
-        for i in range(self.count):
-            new_storage[i] = self.storage
-        self.storage = new_storage
+        self.storage = [None] * self.capacity
+
+        # Reinsert the values into the new list
+        # Iterate across entire index of old storage
+        for index in range(old_capacity):
+            node = old_storage[index]
+            while node is not None:
+                key_hldr = node.key
+                value_hldr = node.value
+                self.insert(key_hldr, value_hldr)
+                node = node.next
 
 
 if __name__ == "__main__":
